@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { Bybit } from "./bybit";
+import { Bybit } from "./core/bybit";
 import { config } from "./configurations";
 
 const app = express();
@@ -35,6 +35,14 @@ app.post("/private/linear/order/create", async (req, res) => {
   }
 });
 
+app.get("/private/linear/order/list", async (req, res) => {
+  const { symbol } = req.body;
+  const activeOrderList = await client.getActiveOrders({
+    symbol,
+  });
+  res.status(200).json(activeOrderList);
+});
+
 app.post("/private/linear/order/cancel", async (req, res) => {
   const { order_id, symbol } = req.body;
   try {
@@ -46,6 +54,12 @@ app.post("/private/linear/order/cancel", async (req, res) => {
   } catch (error) {
     console.log("cancel order error", error);
   }
+});
+
+app.post("/private/linear/order/cancel-all", async (req, res) => {
+  const { symbol } = req.body;
+  const cancelAllOrders = await client.cancelAllOrders({ symbol: symbol });
+  res.status(200).json(cancelAllOrders);
 });
 
 app.listen(process.env.PORT || 3000);

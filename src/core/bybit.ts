@@ -1,4 +1,4 @@
-import { config } from "./configurations";
+import { config } from "../configurations";
 import {
   InverseClient,
   LinearClient,
@@ -11,8 +11,9 @@ import {
   CopyTradingClient,
   RestClientV5,
   NewLinearOrder,
+  LinearGetOrdersRequest,
 } from "bybit-api";
-import { Order } from "./interfaces/IBybit";
+import { Order } from "../interfaces/IBybit";
 
 const wsConfig = {
   KEY: config.API_KEY,
@@ -75,6 +76,15 @@ export class Bybit {
     return null;
   };
 
+  getActiveOrders = async (params: LinearGetOrdersRequest): Promise<[]> => {
+    const { ret_code, ret_msg, result } = await this.client2.getActiveOrderList(
+      params
+    );
+    // console.log("====>", result);
+
+    return result;
+  };
+
   cancelOrder = async (params: {
     symbol: string;
     order_id: string;
@@ -84,6 +94,16 @@ export class Bybit {
       order_id: params.order_id,
     });
     console.log("cancel Order", result);
+
+    return ret_code === 0 && ret_msg === "OK";
+  };
+
+  cancelAllOrders = async (params: { symbol: string }): Promise<boolean> => {
+    const { ret_code, ret_msg, result } =
+      await this.client2.cancelAllActiveOrders({
+        symbol: params.symbol,
+      });
+    console.log("cancel All", result);
 
     return ret_code === 0 && ret_msg === "OK";
   };
